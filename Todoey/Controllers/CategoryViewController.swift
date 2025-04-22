@@ -1,8 +1,8 @@
 import UIKit
 import RealmSwift
-import SwipeCellKit
 
-class CategoryViewController: UITableViewController {
+// implemented the custom class that we created
+class CategoryViewController: SwipeTableViewController {
     
     var categories: Results<Category>?
     
@@ -12,7 +12,6 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
 
         loadCategories()
-        tableView.rowHeight = 80.0
     }
     
     
@@ -49,8 +48,8 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
                 
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
-        cell.delegate = self
+        // by "super" keyword it means it taps into the SwipeTVC 
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories added yet"
         
@@ -93,44 +92,23 @@ class CategoryViewController: UITableViewController {
         
         tableView.reloadData()
     }
-}
-
-//MARK: - Protocol Methods
-
-extension CategoryViewController: SwipeTableViewCellDelegate {
-        
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            // handle action by updating model with deletion
-            
-            if let categoriesForDeletion = self.categories?[indexPath.row] {
-                do {
-                    try self.realm.write {
-                       //deleting in realm
-                        self.realm.delete(categoriesForDeletion)
-                    }
-                } catch {
-                    print("error deleting the item from realm \(error)")
+    
+    //MARK: - Delete Data From Swipe
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let categoriesForDeletion = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    //deleting in realm
+                    self.realm.delete(categoriesForDeletion)
                 }
-                // hint: be sure put this after, otherwise the app crashes because the UI for reloading the table tries to reach the number of cells and show them but since it is deleted it is going to crash
-                // tableView.reloadData()
-                
+            } catch {
+                print("error deleting the item from realm \(error)")
             }
+            // hint: be sure put this after, otherwise the app crashes because the UI for reloading the table tries to reach the number of cells and show them but since it is deleted it is going to crash
+            // tableView.reloadData()
+            
         }
-        // customize the action appearance
-        deleteAction.image = UIImage(named: "delete-icon")
-
-        return [deleteAction]
-    }
-    
-    
-    // this tries to delete the last row on the tableView, so when we use this method we should remove the "tableView.reloadData" otherwise the app crashes, but if we don't use this method, we should include the "tableView.reloadData"
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
-        options.expansionStyle = .destructive
-//        options.transitionStyle = .reveal
-        return options
     }
 }
+

@@ -1,7 +1,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     var todoItems : Results<Item>?
     let realm = try! Realm()
@@ -28,10 +28,9 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         //how we should display each of the cells
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+            
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = todoItems?[indexPath.row] {
             
@@ -41,7 +40,7 @@ class TodoListViewController: UITableViewController {
         } else {
             cell.textLabel?.text = "No Items Added Yet"
         }
-        
+                
         return cell
     }
     
@@ -106,11 +105,6 @@ class TodoListViewController: UITableViewController {
     //MARK: - Read and Write Methods
     
     func saveItems() {
-//        do {
-//            try context.save()
-//        } catch {
-//            print("error saving context \(error)")
-//        }
         
         tableView.reloadData()
     } 
@@ -122,7 +116,22 @@ class TodoListViewController: UITableViewController {
         
         tableView.reloadData()
     }
+    
+    //MARK: - Delete Data From Swipe
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let itemToDelete = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(itemToDelete)
+                }
+            } catch {
+                print("Error deleting item: \(error)")
+            }
+        }
+    }
 }
+
 
 //MARK: - SearchBar Extension
 
@@ -151,6 +160,9 @@ extension TodoListViewController: UISearchBarDelegate {
             }
         }
     }
-    
 }
+
+
+
+
 
