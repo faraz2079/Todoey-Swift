@@ -1,5 +1,5 @@
 {
-  "originHash" : "2174eaf93f622d57be865cd78b51b72620c12528f1f0957292620977c4d69891",
+  "originHash" : "5b41064bafb6c32d33b1a0b41b41b85d17dabd3c94c8f92a998af5848ee4e718",
   "pins" : [
     {
       "identity" : "realm-core",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "f8d74e90eafa2ac0e760bc674b49f40b593b1483",
         "version" : "20.0.2"
+      }
+    },
+    {
+      "identity" : "swipecellkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swipecellkit/swipecellkit.git",
+      "state" : {
+        "revision" : "7219cad3098637176ace311510d11467dbfb9bb0",
+        "version" : "2.7.1"
       }
     }
   ],
