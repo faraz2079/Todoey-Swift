@@ -1,5 +1,6 @@
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 // implemented the custom class that we created
 class CategoryViewController: SwipeTableViewController {
@@ -12,6 +13,15 @@ class CategoryViewController: SwipeTableViewController {
         super.viewDidLoad()
 
         loadCategories()
+        tableView.separatorStyle = .none
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation Bar Not Found")}
+        
+        navBar.backgroundColor = UIColor(hexString: "1D9BF6")
+        
     }
     
     
@@ -26,6 +36,7 @@ class CategoryViewController: SwipeTableViewController {
             
             let newCategory = Category()
             newCategory.name = textField.text!
+            newCategory.color = UIColor.randomFlat().hexValue()
             
             self.save(category: newCategory)
         }
@@ -51,7 +62,15 @@ class CategoryViewController: SwipeTableViewController {
         // by "super" keyword it means it taps into the SwipeTVC 
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories added yet"
+        if let category = categories?[indexPath.row] {
+            
+            guard let categoryColor = UIColor(hexString: category.color) else {fatalError()}
+            
+            cell.textLabel?.text = category.name
+            cell.backgroundColor = categoryColor //UIColor(hexString: "")
+            
+            cell.textLabel?.textColor = ContrastColorOf(categoryColor, returnFlat: true)
+        }
         
         return cell
     }
@@ -80,7 +99,7 @@ class CategoryViewController: SwipeTableViewController {
                 realm.add(category)
             }
         } catch {
-            print("error saving context \(error)")
+            print("error saving data \(error)")
         }
         
         tableView.reloadData()

@@ -1,10 +1,13 @@
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController {
     
     var todoItems : Results<Item>?
     let realm = try! Realm()
+    
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var selectedCategory : Category? {
         //everything inside the didset triggers as soon as the selectedCategory gets a value
@@ -19,6 +22,27 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.separatorStyle = .none
+        
+    }
+    
+    // we run the colorHex in this method while the viewDidLoad method loads before the navigationBar and that gives us the fatal error
+    override func viewWillAppear(_ animated: Bool) {
+        if let colorHex = selectedCategory?.color{
+            
+            self.title = selectedCategory!.name
+            
+            guard let navBar = navigationController?.navigationBar else {fatalError("Navigation Bar Not Found")}
+            
+            if let navBarColor = UIColor(hexString: colorHex) {
+                navBar.backgroundColor = navBarColor
+                searchBar.barTintColor = navBarColor
+                navBar.tintColor = ContrastColorOf(navBarColor, returnFlat: true)
+                navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navBarColor, returnFlat: true)]
+            }
+            
+            
+        }
     }
     
     //MARK: - Tableview DataSource Methods
@@ -35,6 +59,14 @@ class TodoListViewController: SwipeTableViewController {
         if let item = todoItems?[indexPath.row] {
             
             cell.textLabel?.text = item.title
+            
+            let categoryColor = UIColor(hexString: selectedCategory?.color ?? "")
+            
+            if let color = categoryColor?.darken(byPercentage:CGFloat(indexPath.row) / CGFloat(todoItems?.count ?? 1)) {
+                
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+            }
             
             cell.accessoryType = item.done == true ? .checkmark : .none // we can also remove the " == true"
         } else {
